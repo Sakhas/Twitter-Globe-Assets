@@ -1,22 +1,23 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using System.Globalization;
 
 [System.Serializable]
 public class Tweet
 {
 
-    private int id;
-    private string text;
-    private string userLocation;
-    private string placeCountry;
-    private string placeName;
-    private string placeLong;
-    private string placeLat;
-    private string userName;
-    private string tweetLong;
-    private string tweetLat;
-    private DateTime created;
+    public int id;
+    public string text;
+    public string userLocation;
+    public string placeCountry;
+    public string placeName;
+    public float placeLong;
+    public float placeLat;
+    public string userName;
+    public float tweetLong;
+    public float tweetLat;
+    public DateTime created;
 
     public Tweet()
     {
@@ -28,5 +29,9 @@ public class Tweet
         return this.id;
     }
 
+    public override string ToString()
+    {
+        return "Tweet: " + id + " " + text + " " +  " " + userLocation + " " + placeLat + " " + created + " " + placeLat ;
+    }
 
 }

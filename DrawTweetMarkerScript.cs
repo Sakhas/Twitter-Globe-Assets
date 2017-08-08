@@ -12,20 +12,16 @@ namespace WPM
     {
 
         public static string TWEET_URL = "http://localhost:8080/tweets/";
-        public static float MIN_LAT = -85f;
-        public static float MAX_LAT = 85f;
-        public static float MIN_LONG = -180f;
-        public static float MAX_LONG = 180f;
 
         public List<TweetObject> tweetObjects = new List<TweetObject>();
 
         WorldMapGlobe map;
-        float kmRadius = 50;
-        float ringWidthStart = 0;
-        float ringWidthEnd = 1.0f;
+        public float kmRadius = 20;
+        public float ringWidthStart = 0;
+        public float ringWidthEnd = 1.0f;
 
         private float time = 0.0f;
-        public float interpolationPeriod = 30f;
+        public float interpolationPeriod = 5f;
 
         GameObject tweet_icon;
 
@@ -39,6 +35,7 @@ namespace WPM
             {
                 TweetObject obj = new TweetObject(tweet);
                 tweetObjects.Add(obj);
+                addMarker(obj);
             }
         }
 
@@ -56,16 +53,17 @@ namespace WPM
         public void updateTweets()
         {
             Tweet[] tweets = getTweetData();
-            int firstId = tweets[0].getId();
-            tweetObjects.Sort((x, y) => x.getTweet().getId().CompareTo(y.getTweet().getId()));
-            int maxId = tweetObjects[0].getTweet().getId();
+            int maxId = tweets[0].id;
+            int firstId = tweets[tweets.Length - 1].id;
+            print("firstId: " +  firstId);
+            print("maxId: " + maxId);
 
             updateTweetObjects(maxId, firstId, tweets);
         }
 
         private void updateTweetObjects(int maxId, int firstId, Tweet[] tweets)
         {
-            foreach (TweetObject tweet in tweetObjects) {
+            foreach (TweetObject tweet in tweetObjects.ToArray()) {
                 if(tweet.getTweet().getId() < firstId)
                 {
                     deleteMarker(tweet);
@@ -78,7 +76,7 @@ namespace WPM
                 {
                     TweetObject obj = new TweetObject(tweet);
                     tweetObjects.Add(obj);
-                    addMarker(addRandomLat(), addRandomLong(), obj);
+                    addMarker(obj);
                 }
             }
         }
@@ -90,31 +88,20 @@ namespace WPM
             getRequest = WebRequest.Create(tweetUri);
             Stream objStream;
             objStream = getRequest.GetResponse().GetResponseStream();
-
+           
             String result;
             StreamReader reader = new StreamReader(objStream);
             result = fixJson(reader.ReadToEnd());
 
-            print(result);
-
             Tweet[] tweets = JsonHelper.FromJson<Tweet>(result);
+            print(tweets.Length);
+            print(tweets[0]);
             return tweets;
         }
 
-        private float addRandomLong()
+       public void addMarker(TweetObject tweet)
         {
-            return UnityEngine.Random.Range(MIN_LONG, MAX_LONG);
-        }
-
-        private float addRandomLat()
-        {
-            return UnityEngine.Random.Range(MIN_LAT, MAX_LAT);
-        }
-
-       public void addMarker(float lat, float longitude, TweetObject tweet)
-        {
-            Vector3 sphereLocation = Conversion.GetSpherePointFromLatLon(new Vector2(lat, longitude));
-            print(sphereLocation);
+            Vector3 sphereLocation = Conversion.GetSpherePointFromLatLon(new Vector2(tweet.getTweetLat(), tweet.getTweetLong()));
             GameObject obj = map.AddMarker(MARKER_TYPE.CIRCLE_PROJECTED, sphereLocation, kmRadius, ringWidthStart, ringWidthEnd, Color.green);
             tweet.setGameObject(obj);
             
