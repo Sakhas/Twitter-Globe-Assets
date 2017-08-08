@@ -28,6 +28,9 @@ public class TweetObject {
     public void setGameObject (GameObject obj)
     {
         this.gameObject = obj;
+        this.gameObject.AddComponent<OnHoverEffectScript>();
+        OnHoverEffectScript script = this.gameObject.GetComponent<OnHoverEffectScript>();
+        script.tweet = tweet;
     }
 
     public float getTweetLat()
